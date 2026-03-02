@@ -17,7 +17,7 @@ app.get("/", (req, res) => {
 
 // Step 1 → Redirect to Nightbot
 app.get("/auth/nightbot", (req, res) => {
-  const scope = "chat:write";
+  const scope = "channel_send";
   const authURL = `https://api.nightbot.tv/oauth2/authorize?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=${scope}`;
 
   res.redirect(authURL);
