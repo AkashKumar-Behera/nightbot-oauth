@@ -3,6 +3,7 @@ const express = require("express");
 const axios = require("axios");
 const fs = require("fs");
 const app = express();
+const qs = require("querystring");
 
 const PORT = process.env.PORT || 4000;
 
@@ -27,33 +28,28 @@ app.get("/auth/nightbot", (req, res) => {
 app.get("/auth/nightbot/callback", async (req, res) => {
   const code = req.query.code;
 
-  if (!code) {
-    return res.send("No code received.");
-  }
-
   try {
     const response = await axios.post(
       "https://api.nightbot.tv/oauth2/token",
-      {
-        client_id: CLIENT_ID,
-        client_secret: CLIENT_SECRET,
+      qs.stringify({
+        client_id: process.env.NIGHTBOT_CLIENT_ID,
+        client_secret: process.env.NIGHTBOT_CLIENT_SECRET,
         code: code,
         grant_type: "authorization_code",
-        redirect_uri: REDIRECT_URI
+        redirect_uri: process.env.NIGHTBOT_REDIRECT_URI,
+      }),
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
       }
     );
 
-    const tokenData = response.data;
-
-    fs.writeFileSync(
-      "nightbot_token.json",
-      JSON.stringify(tokenData, null, 2)
-    );
-
-    res.send("✅ Nightbot Connected & Token Saved!");
-  } catch (error) {
-    console.error(error.response?.data || error.message);
-    res.send("❌ Token exchange failed.");
+    console.log(response.data);
+    res.send("OAuth Success ✅ Token saved");
+  } catch (err) {
+    console.log(err.response?.data || err.message);
+    res.send("Token exchange failed ❌");
   }
 });
 
